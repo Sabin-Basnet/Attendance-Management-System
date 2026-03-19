@@ -1,0 +1,114 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #31465b; /* Very light grey, almost white */
+    font-family: 'Inter', sans-serif;
+    color: #1e293b; /* Dark slate text */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.viewport-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.login-card {
+    background-color: #ffffff; /* Explicitly White */
+    width: 100%;
+    max-width: 420px;
+    padding: 50px 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border: 1px solid #e2e8f0; /* Subtle border for definition */
+}
+
+.campus-logo {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.logo-text {
+    background-color: #2563eb; /* Strong Blue */
+    color: #ffffff;
+    font-weight: 800;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #0f172a;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 35px;
+}
+
+.input-block {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-block label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.input-block input {
+    width: 100%;
+    padding: 14px;
+    background-color: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.input-block input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.login-button {
+    width: 100%;
+    padding: 15px;
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-button:hover {
+    background-color: #1d4ed8;
+}
+
+.footer-note {
+    margin-top: 40px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
