@@ -1,44 +1,46 @@
-# Attendance-Management-System
-📋 IOE Attendance Management System
-A robust, web-based attendance tracking solution designed for engineering departments. This system allows professors to manage student attendance for multiple batches (years) and subjects, with automated report generation.
+# <U>ATTENDANCE MANAGEMENT SYSTEM</U>
+## 📝 Project Overview
+This is a PHP & MySQL based web application designed to automate student attendance tracking for the Computer Engineering department. It replaces manual registers with a digital database, ensuring data integrity and easy report generation.
 
-🚀 Key Features
-Department-Based Login: Secure access for professors, filtering data by their specific department (BCT, BCE, etc.).
+Note: This project was developed as part of the DBMS Coursework (2026).
 
-Dynamic Year Filtering: "Year-Only" logic to manage 50+ subjects and 100+ students efficiently.
+## 🚀 Key Features
+### 1. Secure Teacher Login
+* Department-specific access (e.g., BCT).
+* Session-based security to prevent unauthorized URL access.
 
-Real-Time Search: Instant AJAX-powered search bar to find students by Name or Roll Number.
+### 2. Smart Attendance Filter
+* Year-Only Logic: Quickly filter 100+ students and 50+ subjects.
+* AJAX Powered: Save attendance and load data without refreshing the page.
 
-Official Reports: Automated calculation of attendance percentages with "Attendance Shortage" (below 70%) highlighting.
+### 3. Automated PDF Reports
+* Highlights students with shortage ( < 70% ) in red.
+* Clean, professional print layout for official documentation.
 
-Print to PDF: Clean, professional CSS styles for printing official reports for department heads.
+## 🛠️ Technical Stack
+* Language: PHP 
+* Database: MySQL (Structured in 3rd Normal Form)
+* Frontend: HTML5, CSS3, jQuery (AJAX)
+* Server: XAMPP (Apache)
 
-🛠️ Tech Stack
-Frontend: HTML5, CSS3, JavaScript (jQuery)
-
-Backend: PHP 8.x
-
-Database: MySQL
-
-Architecture: AJAX-based asynchronous data handling (No page refreshes)
-⚙️ Local Setup Instructions
-Clone the Repository:
-
+## 💻 How to Set Up Locally
+### Step 1: Clone the Project
 Bash
-git clone https://github.com/your-username/your-repo-name.git
-Move to XAMPP:
-Place the folder inside your C:\xampp\htdocs\ directory.
+* git clone https://github.com/Sabin-Basnet/Attendance-Management-System.git
+### Step 2: Database Setup
+* Open phpMyAdmin (localhost/phpmyadmin).
+* Create a new database named attendance_db.
+* Run the createtables.php file in your browser:
+localhost/your_folder_name/createtables.php
+(This will automatically create all tables and insert 100 students).
 
-Database Configuration:
+### Step 3: Run the App
+* Open your browser and go to:
+localhost/your_folder_name/login.php
 
-Open XAMPP and start Apache and MySQL.
+## 📊 Entity Relationship (ER) Logic
+Our database design follows strict relational principles:
 
-Go to localhost/phpmyadmin and create a database named attendance_db.
-
-Open database/database.php and ensure your credentials match your local setup.
-
-Run Setup Script:
-Run localhost/your-project-folder/createtables.php in your browser. This will automatically create the 4 tables and insert the demo data (100 students).
-
-📊 Database Schema (3NF)
-The project follows Third Normal Form (3NF) to ensure data integrity and zero redundancy.
+* Entities: Teacher, Student, Course
+* Relation: Attendance (Associative Entity)
+* Normalization: 3NF
