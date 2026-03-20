@@ -1,13 +1,9 @@
 $(document).ready(function() {
     
-    // 1. Load Subjects based on Year
+    // 1. Load Subjects when Year changes
     $("#year_select").change(function() {
         let yr = $(this).val();
-        if(!yr) {
-            $("#subject_select").html('<option value="">Select Year First</option>');
-            return;
-        }
-
+        if(!yr) return;
         $.ajax({
             url: "ajaxhandler/attendanceAjax.php",
             type: "POST",
@@ -15,74 +11,78 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 let html = '<option value="">Select Subject</option>';
-                if(data.length > 0) {
-                    data.forEach(sub => {
-                        html += `<option value="${sub.id}">${sub.course_name}</option>`;
-                    });
-                } else {
-                    html = '<option value="">No subjects found</option>';
-                }
+                data.forEach(sub => { 
+                    html += `<option value="${sub.id}">${sub.course_name}</option>`; 
+                });
                 $("#subject_select").html(html);
+                $("#student_list_area").hide(); // Hide list if year/subject changes
             }
         });
     });
 
-    // 2. Refresh list automatically if Date changes while table is visible
+    // 2. Manual Trigger: View Students
+    $("#load_students_btn").click(function() {
+        if(!$("#subject_select").val()) return alert("Please select a subject");
+        fetchList();
+    });
+
+    // 3. Auto-refresh on Date change (only if list is already open)
     $("#attendance_date").change(function() {
         if($("#student_list_area").is(":visible")) {
-            $("#load_students_btn").click();
+            fetchList();
         }
     });
 
-    // 3. Load Student List (With historical data check)
-    $("#load_students_btn").click(function() {
-        let subId = $("#subject_select").val();
-        let dateVal = $("#attendance_date").val();
-
-        if(!subId) return alert("Please select a subject first.");
+    // 4. Fetch Function: Now handles "Remembering" saved data
+    function fetchList() {
+        let yr = $("#year_select").val();
+        let sub = $("#subject_select").val();
+        let dt = $("#attendance_date").val();
 
         $.ajax({
             url: "ajaxhandler/attendanceAjax.php",
             type: "POST",
             data: { 
                 action: "get_students", 
-                date: dateVal, 
-                course_id: subId 
+                year: yr,
+                date: dt,
+                course_id: sub
             },
             dataType: "json",
             success: function(data) {
                 let html = '';
                 data.forEach((stu, i) => {
-                    // If status is 'P' in database, check the box
                     let isChecked = (stu.status === 'P') ? 'checked' : '';
-                    
+    
                     html += `<tr>
-                        <td>${i + 1}</td>
+                        <td>${i+1}</td>
                         <td>${stu.roll_no}</td>
                         <td>${stu.name}</td>
-                        <td>
-                            <input type="checkbox" class="status-chk" data-id="${stu.id}" ${isChecked}> 
-                            <span class="status-label">Present</span>
+                        <td style="display: flex; align-items: center; gap: 15px;">
+                            <label><input type="checkbox" class="status-chk" data-id="${stu.id}" ${isChecked}> Present</label>
+                            <button class="delete-student-btn" data-id="${stu.id}" data-name="${stu.name}" 
+                                    style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.2rem;" title="Delete Student">
+                                🗑
+                            </button>
                         </td>
                     </tr>`;
                 });
-                
                 $("#student_data").html(html);
                 $("#student_list_area").show();
-                $("#display_title").text($("#subject_select option:selected").text() + " (" + dateVal + ")");
                 
-                // Reset the "Select All" checkbox when new data loads
-                $("#select_all_btn").prop('checked', false);
+                // Re-sync the "Select All" checkbox state
+                updateSelectAllState();
+                updateCount();
             }
         });
-    });
+    }
 
-    // 4. Save Attendance (Updated with Toast Notification)
-    $("#save_attendance_btn").click(function() {
-        let dateVal = $("#attendance_date").val();
-        let subId = $("#subject_select").val();
-
+    // 5. Save Logic (Silent with Toast)
+    $(document).on("click", "#save_attendance_btn", function() {
         let attendanceData = [];
+        let subId = $("#subject_select").val();
+        let dateVal = $("#attendance_date").val();
+
         $(".status-chk").each(function() {
             attendanceData.push({
                 student_id: $(this).data("id"),
@@ -90,47 +90,149 @@ $(document).ready(function() {
             });
         });
 
+        const btn = $(this);
+        btn.prop('disabled', true).text("Saving...");
+
         $.ajax({
             url: "ajaxhandler/attendanceAjax.php",
             type: "POST",
             data: { 
                 action: "save_attendance", 
-                date: dateVal, 
+                date: dateVal,
                 course_id: subId,
                 attendance: attendanceData 
             },
             dataType: "json",
             success: function(res) {
-                if(res.status == "OK") {
-                    showToast(res.message); // Call the professional toast!
+                btn.prop('disabled', false).text("Save Attendance");
+                if(res.status === "OK") {
+                    // Show toast notification
+                    $("#toast_message").stop(true, true).fadeIn().delay(2000).fadeOut();
                 } else {
-                    alert("Error: " + res.message); // Keep alert only for errors
+                    alert("Error: " + res.message);
                 }
+            },
+            error: function() {
+                btn.prop('disabled', false).text("Save Attendance");
+                alert("Critical error occurred while saving.");
             }
         });
     });
 
-    // Helper function to show the Toast
-    function showToast(msg) {
-    let toast = $("#toast_message");
-    
-    // If it's already showing, don't restart the animation
-    if (toast.hasClass("show")) return;
-
-    toast.text(msg);
-    toast.addClass("show");
-    
-    // Auto-hide after 3 seconds
-    setTimeout(function() { 
-        toast.removeClass("show"); 
-    }, 3000);
-    }
-
-    // 5. THE SELECT ALL FEATURE
-    // This allows the teacher to toggle all 100 students at once
+    // 6. Helpers: Checkbox & Counter Logic
     $(document).on("change", "#select_all_btn", function() {
-        let isChecked = $(this).prop('checked');
-        $(".status-chk").prop('checked', isChecked);
+        $(".status-chk").prop('checked', $(this).is(':checked'));
+        updateCount();
     });
 
+    $(document).on("change", ".status-chk", function() {
+        updateCount();
+        updateSelectAllState();
+    });
+
+    function updateCount() {
+        $("#present_count").text($(".status-chk:checked").length);
+    }
+
+    // Automatically untick "Select All" if one student is unchecked
+    function updateSelectAllState() {
+        let total = $(".status-chk").length;
+        let checked = $(".status-chk:checked").length;
+        if(total > 0 && total === checked) {
+            $("#select_all_btn").prop('checked', true);
+        } else {
+            $("#select_all_btn").prop('checked', false);
+        }
+    }
+
+    //this is to add student
+    // Open Modal
+    $(document).on("click", "#open_add_modal", function(e) {
+        e.preventDefault();
+        $("#add_student_modal").css("display", "flex").hide().fadeIn(200);
+    });
+
+    // Close Modal (Clicking Cancel)
+    $(document).on("click", "#close_modal", function() {
+        $("#add_student_modal").fadeOut(200);
+    });
+
+    // Close Modal (Clicking outside the white box)
+    $(window).on("click", function(e) {
+        if ($(e.target).is("#add_student_modal")) {
+            $("#add_student_modal").fadeOut(200);
+        }
+    });
+
+    // Handle Form Submission
+    $("#add_student_form").on("submit", function(e) {
+        e.preventDefault();
+        
+        // Collect data
+        let name = $("input[name='stu_name']").val();
+        let roll = $("input[name='stu_roll']").val();
+        let year = $("select[name='stu_year']").val();
+
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).text("Adding...");
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAjax.php",
+            type: "POST",
+            data: {
+                action: "add_student",
+                stu_name: name,
+                stu_roll: roll,
+                stu_year: year
+            },
+            dataType: "json",
+            success: function(res) {
+                submitBtn.prop('disabled', false).text("Register Student");
+                if(res.status === "OK") {
+                    $("#add_student_modal").fadeOut();
+                    $("#add_student_form")[0].reset();
+                    
+                    // Show Success Toast
+                    $("#toast_message").text(res.message).stop(true, true).fadeIn().delay(2000).fadeOut();
+                    
+                    // Refresh student list if it's currently open
+                    if($("#student_list_area").is(":visible")) {
+                        fetchList(); 
+                    }
+                } else {
+                    alert(res.message); // Show error (e.g., "Roll No exists")
+                }
+            },
+            error: function() {
+                submitBtn.prop('disabled', false).text("Register Student");
+                alert("Server error. Check AJAX handler.");
+            }
+        });
+    });
+
+    // --- DELETE STUDENT LOGIC ---
+    $(document).on("click", ".delete-student-btn", function() {
+        let studentId = $(this).data("id");
+        let studentName = $(this).data("name");
+    
+        if (confirm(`Are you sure you want to delete ${studentName}? This will also remove all their attendance records.`)) {
+            $.ajax({
+                url: "ajaxhandler/attendanceAjax.php",
+                type: "POST",
+                data: {
+                    action: "delete_student",
+                    stu_id: studentId
+                },
+                dataType: "json",
+                success: function(res) {
+                    if(res.status === "OK") {
+                        $("#toast_message").text(res.message).stop(true, true).fadeIn().delay(2000).fadeOut();
+                        fetchList(); // Refresh the list immediately
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    });
 });

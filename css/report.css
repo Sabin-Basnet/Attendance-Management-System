@@ -1,0 +1,9 @@
+@media print {
+    .nav-bar, .filter-section, .btn-success, .logout-link {
+        display: none !important;
+    }
+    .main-content { padding: 0; }
+    .card { box-shadow: none; border: none; padding: 0; }
+    body { background: white; }
+    .attendance-table th { background: #eee !important; color: black; }
+}

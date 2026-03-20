@@ -10,7 +10,7 @@ $pw = $_POST['password'] ?? '';
 
 if (!empty($un) && !empty($pw)) {
     // We match against the 'teacher_details' table we created in createtables.php
-    $sql = "SELECT * FROM teacher_details WHERE user_name = :un AND password = :pw LIMIT 1";
+    $sql = "SELECT * FROM teacher_details WHERE user_name = :un AND password = :pw LIMIT 1";// limit 1: stop looking for another after first match
     $stmt = $conn->prepare($sql);
     $stmt->execute(['un' => $un, 'pw' => $pw]);
     $teacher = $stmt->fetch(PDO::FETCH_ASSOC);
