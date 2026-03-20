@@ -3,7 +3,7 @@ $(document).ready(function() {
 
     $(document).on("click", "#loginbtn", function(e) {
         e.preventDefault();
-        alert("Click Detected!"); // If you see this, the JS is working!
+        // alert("Click Detected!"); 
 
         let un = $("#un").val();
         let pw = $("#pw").val();

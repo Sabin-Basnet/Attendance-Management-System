@@ -47,7 +47,7 @@ try {
 
     echo "Tables created successfully.<br>";
 
-    // --- SEEDING DATA ---
+    // --- entering DATA ---
 
     // Insert Teachers (Password is '123' for both)
     $stmt = $conn->prepare("INSERT INTO teacher_details (name, user_name, password, department) VALUES (?, ?, ?, ?)");
